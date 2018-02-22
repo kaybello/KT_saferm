@@ -4,7 +4,8 @@ trashSafermPath="$HOME/$trashSafermName"
 FilePath=$1
 totalItemListing=$(ls -l "$FilePath")
 
-
+loopArray[0]='.'
+loopCount=0
 # create .trash_saferm if it doesn't exist
 
 
@@ -16,57 +17,78 @@ then
 fi
 
 handleFiles() {
-    echo "$1 is a file"
+
     read -p "do you want to remove $1?" reply
     #if the first letter of the reply is lower or upper case Y
     if [[ $reply =~ ^[y*/Y*]$  ]];
     then
-        mv $1 $HOME/.Trash_saferm
+        mv $1 $trashSafermPath
         echo "$1 removed"
     #else if the first letter of the reply is lower or upper case N
     elif [[ $reply =~ ^[n*/N*]$ ]];
     then
-        echo "can't be removed"
+        echo "$1 can't be removed"
     else
         echo "error"
     fi
 }
 
 handleDirectories() {
+
+    loopCount=$((loopCount+1))
+    loopArray[$loopCount]=$1
+
     echo "$1 is a directory"
     read -p "examine files in directory $1? " reply
+
+    echo "================================================================="
+    echo "loop is at position $loopCount"
+    echo "================================================================="
 
     #if the first letter of the reply is lower or upper case Y
     if [[ $reply =~ ^[y*/Y*]$ ]]
     then
         #examine each file
+        directoryItems=$(ls -l "$1" | sort -k1,1 | awk -F " " '{print $NF}' | sed -e '$ d' )
+        directoryItemsCount=$( ls -l "$1" | sort -k1,1 | awk -F " " '{print $NF}' | sed -e '$ d' | wc -l | xargs)
+        currrentDir=$1
+        if [[ $directoryItemsCount -gt true ]]
+        then
+            echo "directory not empty"
 
-        for item in $(ls -l "$1" | sort -k1,1 | awk -F " " '{print $NF}' | sed -e '$ d' ); do
+            for item in $directoryItems; do
 
-            #check if item is a file or directory
-            checkIfFilesOrDirectories "$1/$item"
+                #check if item is a file or directory
+                checkIfFilesOrDirectories "$currrentDir/$item"
 
-            if [[ $? -eq true ]]
-            then
-
-                handleFiles "$1/$item"
-
- directoryItemsCount=$(ls -l "$1" | sort -k1,1 | awk -F " " '{print $NF}' | sed -e '$ d' | wc -l )
-
-            else
-                handleDirectories "$1/$item"
-                if [[ $directoryItemsCount -gt 0 ]]
+                if [[ $? -eq true ]]
                 then
-                    echo "directory not empyt"
-
+                        handleFiles "$currrentDir/$item"
                 else
-                    echo "directory empyt"
 
+                  handleDirectories "$currrentDir/$item"
+
+                  #handle caller
+                  handleFiles "${loopArray[$loopCount]}"
+
+                  echo "================================================================="
+                  echo "end position $loopCount loop [ ${loopArray[$loopCount]}  ]"
+                  echo "================================================================="
+                      #move back one folder
+                    loopCount=$((loopCount-1))
                 fi
-            fi
-        done
+            done
+
+        else
+            echo "directory empyt"
+            #delete the directory
+            handleFiles $currrentDir
+        fi
 
     fi
+
+    loopCount=$((loopCount-1))
+    #move back one folder
 }
 
 checkIfFilesOrDirectories(){
@@ -86,3 +108,5 @@ then
 else
     handleDirectories $1
 fi
+
+echo "${loopArray[*]}"
