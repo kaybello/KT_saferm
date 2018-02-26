@@ -1,11 +1,9 @@
 #!/bin/bash
+homeDir=$( pwd )
 trashSafermName=".Trash_saferm"
 trashSafermPath="$HOME/$trashSafermName"
 FilePath=$1
 totalItemListing=$(ls -l "$FilePath")
-
-loopArray[0]='.'
-loopCount=0
 # create .trash_saferm if it doesn't exist
 
 
@@ -15,6 +13,7 @@ then
     mkdir "$trashSafermPath"
     echo "$trashSafermName created"
 fi
+
 
 handleFiles() {
 
@@ -33,17 +32,13 @@ handleFiles() {
     fi
 }
 
+
+
+
 handleDirectories() {
-
-    loopCount=$((loopCount+1))
-    loopArray[$loopCount]=$1
-
+    currrentDir=$1
     echo "$1 is a directory"
     read -p "examine files in directory $1? " reply
-
-    echo "================================================================="
-    echo "loop is at position $loopCount"
-    echo "================================================================="
 
     #if the first letter of the reply is lower or upper case Y
     if [[ $reply =~ ^[y*/Y*]$ ]]
@@ -51,7 +46,7 @@ handleDirectories() {
         #examine each file
         directoryItems=$(ls -l "$1" | sort -k1,1 | awk -F " " '{print $NF}' | sed -e '$ d' )
         directoryItemsCount=$( ls -l "$1" | sort -k1,1 | awk -F " " '{print $NF}' | sed -e '$ d' | wc -l | xargs)
-        currrentDir=$1
+        # currrentDir=$1
         if [[ $directoryItemsCount -gt true ]]
         then
             echo "directory not empty"
@@ -68,27 +63,27 @@ handleDirectories() {
 
                   handleDirectories "$currrentDir/$item"
 
-                  #handle caller
-                  handleFiles "${loopArray[$loopCount]}"
+                #  currrentDir=$(dirName $currrentDir)
 
-                  echo "================================================================="
-                  echo "end position $loopCount loop [ ${loopArray[$loopCount]}  ]"
-                  echo "================================================================="
-                      #move back one folder
-                    loopCount=$((loopCount-1))
                 fi
             done
+            #currrentDir=$(dirName $currrentDir)
+            #previousDir
 
         else
             echo "directory empyt"
             #delete the directory
             handleFiles $currrentDir
-        fi
+            #currrentDir=$(dirName $currrentDir)
 
+        fi
+          if [ "currrentDir" != "." ]; then
+            handleFiles $currrentDir
+          fi
     fi
 
-    loopCount=$((loopCount-1))
     #move back one folder
+    currrentDir=$(dirName $currrentDir)
 }
 
 checkIfFilesOrDirectories(){
@@ -102,11 +97,10 @@ checkIfFilesOrDirectories(){
 
 checkIfFilesOrDirectories $1
 
-if [[ $? -eq true ]]
-then
-    handleFiles $1
-else
-    handleDirectories $1
-fi
+  if [[ $? -eq true ]]
+  then
+      handleFiles $1
+  else
+      handleDirectories $1
 
-echo "${loopArray[*]}"
+  fi
