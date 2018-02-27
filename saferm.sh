@@ -1,7 +1,7 @@
 #!/bin/bash
-homeDir=$( pwd )
+homeDir="$HOME"
 trashSafermName=".Trash_saferm"
-trashSafermPath="$HOME/$trashSafermName"
+trashSafermPath="$homeDir/$trashSafermName"
 FilePath=$1
 totalItemListing=$(ls -l "$FilePath")
 # create .trash_saferm if it doesn't exist
@@ -11,7 +11,7 @@ totalItemListing=$(ls -l "$FilePath")
 if [ ! -d "$trashSafermPath" ];
 then
     mkdir "$trashSafermPath"
-    echo "$trashSafermName created"
+    # echo "$trashSafermName created"
 fi
 
 
@@ -21,19 +21,16 @@ handleFiles() {
     #if the first letter of the reply is lower or upper case Y
     if [[ $reply =~ ^[y*/Y*]$  ]];
     then
-        mv $1 $trashSafermPath
+        mv "$1" $trashSafermPath
         echo "$1 removed"
     #else if the first letter of the reply is lower or upper case N
-    elif [[ $reply =~ ^[n*/N*]$ ]];
-    then
-        echo "$1 can't be removed"
+    #elif [[ $reply =~ ^[n*/N*]$ ]];
+    #then
+        #echo "$1 not removed"
     else
         echo "error"
     fi
 }
-
-
-
 
 handleDirectories() {
     currrentDir=$1
@@ -68,12 +65,12 @@ handleDirectories() {
                 fi
             done
             #currrentDir=$(dirName $currrentDir)
-            #previousDir
+
 
         else
             echo "directory empyt"
             #delete the directory
-            handleFiles $currrentDir
+          #  handleFiles $currrentDir
             #currrentDir=$(dirName $currrentDir)
 
         fi
@@ -95,12 +92,61 @@ checkIfFilesOrDirectories(){
     fi
 }
 
-checkIfFilesOrDirectories $1
 
-  if [[ $? -eq true ]]
-  then
-      handleFiles $1
-  else
-      handleDirectories $1
+# if [[ $? -eq true ]]
+# then
+#     handleFiles $FilePath
+# else
+#     handleDirectories $FilePath
+#
+fi
 
-  fi
+
+vFlag=0
+rFlag=0
+dFlag=0
+
+while getopts ":v:r:d:" opt; do
+
+  case $opt in
+
+  	v) #verbose
+      vFlag=1
+      vArg=$OPTARG
+      if [[ $vFlag -eq 1 ]]; then
+        # FilePath=$vArg
+        echo "$vArg has been removed"
+      fi
+
+      ;;
+
+    r) #recursive
+      rFlag=1
+      rArg=$OPTARG
+      ;;
+
+    d) #deleteAll
+      dFlag=1
+      dArg=$OPTARG
+      ;;
+  		#statements
+
+  esac
+	#statements
+done
+shift "$(($OPTIND -1))"
+
+
+if [[ $rFlag -eq 1 ]]; then
+  # FilePath=$rArg
+  handleDirectories $rArg
+fi
+
+if [[ $dFlag -eq 1 ]]; then
+# FilePath=$dArg
+  mv $dArg $trashSafermPath
+
+  exit
+fi
+
+ checkIfFilesOrDirectories $FilePath

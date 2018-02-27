@@ -96,3 +96,27 @@ function processInput(){
 init
 
 processInput $rootFile
+
+
+
+# while getopts v:r:d: opt; do
+# 	case $opt in
+#
+# 	v) #verbose
+# 	vFlag=1
+# 	vArg=$OPTARG
+#
+# 	if [[ "$vFlag" -gt 1 || "$vFlag" -eq 1 && -f "$vArg"]]
+# 	then
+# 		handleFile "$vArg"
+# 	elif [[ if "$vFlag" -gt 1 || "$vFlag" -eq 1 && -d "$vArg" ]];
+# 	then
+# 		echo "usage: $vArg"
+# 	fi
+# 	;;
+# 		#statements
+#
+# 	esac
+# 	#statements
+# done
+# shift "$(($OPTIND -1))"
