@@ -1,5 +1,4 @@
 #!/bin/bash
-presentWD=$(pwd)
 homeDir="$HOME"
 trashSafermName=".Trash_saferm"
 trashSafermPath="$homeDir/$trashSafermName"
@@ -15,14 +14,6 @@ then
     # echo "$trashSafermName created"
 fi
 
-checkIfFilesOrDirectories(){
-    if [[ -f "${1}" ]]
-    then
-        true
-    else
-        false
-    fi
-}
 
 handleFiles() {
 
@@ -43,7 +34,7 @@ handleFiles() {
 
 handleDirectories() {
     currrentDir=$1
-  #  echo "$1 is a directory"
+    echo "$1 is a directory"
     read -p "examine files in directory $1? " reply
 
     #if the first letter of the reply is lower or upper case Y
@@ -92,46 +83,45 @@ handleDirectories() {
     currrentDir=$(dirName $currrentDir)
 }
 
-actionForIfFileOrDirectory (){
-  if [[ -f "$1" && $rFlag -eq 0 ]]
-  then
-      handleFiles $1
-  elif [[ -d "$1" && $rFlag -eq 0 ]];
-  then
-      handleDirectories $1
-  fi
+checkIfFilesOrDirectories(){
+    if [[ -f "${1}" ]]
+    then
+        true
+    else
+        false
+    fi
 }
- actionForIfFileOrDirectory $1
+
+
 # if [[ $? -eq true ]]
 # then
-#     handleFiles $1
+#     handleFiles $filePath
 # else
-#     handleDirectories $1
+#     handleDirectories $filePath
 #
 # fi
 
-
-
-
+if [[ -f "$1" ]]
+then
+    handleFiles $1
+else
+    handleDirectories $1
+fi
 
 vFlag=0
 rFlag=0
 dFlag=0
 
-while getopts ":v:r:d:R:" opt; do
+while getopts ":v:r:d:" opt; do
 
   case $opt in
 
   	v) #verbose
       vFlag=1
       vArg=$OPTARG
-      if [[ $vFlag -eq 1 && -f "$vArg" ]];
-      then
-        # filePath=$vArg
+      if [[ $vFlag -eq 1 ]]; then
+         filePath=$vArg
         echo "$vArg has been removed"
-        mv $vArg $trashSafermPath
-      else
-        echo "$vArg is a directory"
       fi
 
       ;;
@@ -139,60 +129,13 @@ while getopts ":v:r:d:R:" opt; do
     r) #recursive
       rFlag=1
       rArg=$OPTARG
-      if [[ $rFlag -eq 1 && -f "$rArg" ]];
-      then
-        echo "removed"
-        mv $rArg $trashSafermPath
-        # filePath=$rArg
-      else
-         handleDirectories $rArg
-      fi
       ;;
 
     d) #deleteAll
       dFlag=1
       dArg=$OPTARG
-      directoryItemsCount=$( ls -l "$dArg" | sort -k1,1 | awk -F " " '{print $NF}' | sed -e '$ d' | wc -l | xargs)
-      if [[ $dFlag -eq 1 && -f "$dArg" ]];
-      then
-      # filePath=$dArg
-        mv $dArg $trashSafermPath
-      elif [[ $dFlag -eq 1 && -d "$dArg" ]];
-      then
-          if [[ $directoryItemsCount -gt true ]];
-          then
-            echo "directory not empty"
-          else
-            echo "removed"
-            mv $dArg $trashSafermPath
-        #statements
-          fi
-        exit
-      fi
       ;;
-
-    	#statements
-    R)
-      Rflag=1
-      RArg=$OPTARG
-      itemPath=$presentWD/$RArg
-      objectPath=$(dirname $itemPath)
-      trash=$trashSafermPath/$RArg
-
-      if [[ $Rflag -eq 1 ]]
-      then
-        read -p "do you want to recover $RArg ?" reply
-        #if the first letter of the reply is lower or upper case Y
-        if [[ $reply =~ ^[y*/Y*]$  ]];
-        then
-          # echo "$objectPath"
-          # echo "$trash"
-          mv $trash $objectPath
-          echo "$RArg recovered"
-        else
-          echo "$RArg not recovered"
-        fi
-      fi
+  		#statements
 
   esac
 	#statements
@@ -200,20 +143,17 @@ done
 shift "$(($OPTIND -1))"
 
 
+if [[ $rFlag -eq 1 ]]; then
+   filePath=$rArg
+  handleDirectories $rArg
+fi
+
+if [[ $dFlag -eq 1 ]]; then
+ filePath=$dArg
+  mv $filePath $trashSafermPath
+
+  exit
+fi
 
 
-
-
-
-
- # checkIfFilesOrDirectories $filePath
-
-
-
- # if [[ $? -eq true ]]
- # then
- #     handleFiles $1
- # else
- #     handleDirectories $1
- #
- # fi
+  checkIfFilesOrDirectories $filePath
