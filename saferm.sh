@@ -26,12 +26,12 @@ checkIfFilesOrDirectories(){
 
 handleFiles() {
 
-    read -p "do you want to remove $1?" reply
+    read -p "remove $1?" reply
     #if the first letter of the reply is lower or upper case Y
     if [[ $reply =~ ^[y*/Y*]$  ]];
     then
         mv "$1" $trashSafermPath
-        echo "$1 removed"
+        echo "$1"
     #else if the first letter of the reply is lower or upper case N
     #elif [[ $reply =~ ^[n*/N*]$ ]];
     #then
@@ -43,10 +43,8 @@ handleFiles() {
 
 handleDirectories() {
     currrentDir=$1
-  #  echo "$1 is a directory"
     read -p "examine files in directory $1? " reply
-
-    #if the first letter of the reply is lower or upper case Y
+  #if the first letter of the reply is lower or upper case Y
     if [[ $reply =~ ^[y*/Y*]$ ]]
     then
         #examine each file
@@ -128,7 +126,7 @@ while getopts ":v:r:d:R:" opt; do
       if [[ $vFlag -eq 1 && -f "$vArg" ]];
       then
         # filePath=$vArg
-        echo "$vArg has been removed"
+        echo "$vArg"
         mv $vArg $trashSafermPath
       else
         echo "$vArg is a directory"
@@ -142,6 +140,7 @@ while getopts ":v:r:d:R:" opt; do
       if [[ $rFlag -eq 1 && -f "$rArg" ]];
       then
         echo "removed"
+
         mv $rArg $trashSafermPath
         # filePath=$rArg
       else
@@ -165,13 +164,12 @@ while getopts ":v:r:d:R:" opt; do
           else
             echo "removed"
             mv $dArg $trashSafermPath
-        #statements
           fi
         exit
       fi
       ;;
 
-    	#statements
+    	#recovery
     R)
       Rflag=1
       RArg=$OPTARG
@@ -195,7 +193,6 @@ while getopts ":v:r:d:R:" opt; do
       fi
 
   esac
-	#statements
 done
 shift "$(($OPTIND -1))"
 
