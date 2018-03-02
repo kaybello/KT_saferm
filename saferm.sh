@@ -137,11 +137,11 @@ while getopts ":v:r:d:R:" opt; do
     r) #recursive
       rFlag=1
       rArg=$OPTARG
-      if [[ $rFlag -eq 1 && -f "$rArg" ]];
+      if [[ $rFlag -eq 1 ]] && [[ -f "$rArg" ]];
       then
-        echo "removed"
-
-        mv $rArg $trashSafermPath
+        handleFiles $rArg
+        #mv $rArg $trashSafermPath
+        #echo "removed"
         # filePath=$rArg
       else
          handleDirectories $rArg
@@ -162,7 +162,7 @@ while getopts ":v:r:d:R:" opt; do
           then
             echo "directory not empty"
           else
-            echo "removed"
+          #  echo "removed"
             mv $dArg $trashSafermPath
           fi
         exit
